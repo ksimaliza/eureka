@@ -23,13 +23,13 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh  'docker build -t servicio1 .'
+                bat  'docker build -t servicio1 .'
             }
         }
 
         stage('Docker Run') {
             steps {
-                sh  'docker run -d -p 8761:8761 --name servicio1 servicio1'
+                bat  'docker run -d -p 8761:8761 --name servicio1 servicio1'
             }
         }
     }
