@@ -1,7 +1,9 @@
 pipeline {
     agent any
    environment {
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        DOCKERHUB_CREDENTIALS = 'dockerhub-creds' // Credenciales de Docker Hub en Jenkins
+        DOCKERHUB_REPO = 'ksimaliza/servicio1'  // Cambia por tu repo
+        IMAGE_TAG = "latest"
     }
     tools {
         maven 'Maven3'    // Nombre EXACTO configurado en Jenkins -> Global Tool Configuration
@@ -15,21 +17,31 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                bat  'mvn clean package -DskipTests'
+                script {
+                    docker.build("${DOCKERHUB_REPO}:${IMAGE_TAG}")
+                }
             }
         }
 
-        stage('Docker Build') {
+       stage('Run Docker Container') {
             steps {
-                bat  'docker build -t servicio1 .'
+                script {
+                    echo "Corriendo contenedor..."
+                    def app = docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}")
+                    app.run('-d -p 8080:8080')  // -d: detached, -p: mapea puertos
+                }
             }
         }
 
-        stage('Docker Run') {
+       stage('Login Docker Hub & Push') {
             steps {
-                bat  'docker run -d -p 8761:8761 --name servicio1 servicio1'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        docker.image("${DOCKERHUB_REPO}:${IMAGE_TAG}").push()
+                    }
+                }
             }
         }
     }
