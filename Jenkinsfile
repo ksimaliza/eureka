@@ -11,25 +11,25 @@ pipeline {
     stages {
         stage('Checkout') {
      steps {
-                git branch: 'main', url: 'https://github.com/gabo109/eureka.git', credentialsId: 'github-credentials'
+                git branch: 'main', url: 'https://github.com/ksimaliza/eureka.git', credentialsId: 'github-credentials'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                sh  'mvn clean package -DskipTests'
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t servicio1 .'
+                sh  'docker build -t servicio1 .'
             }
         }
 
         stage('Docker Run') {
             steps {
-                bat 'docker run -d -p 8761:8761 --name servicio1 servicio1'
+                sh  'docker run -d -p 8761:8761 --name servicio1 servicio1'
             }
         }
     }
